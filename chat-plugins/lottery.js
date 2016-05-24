@@ -41,7 +41,7 @@ exports.commands = {
 					if (Number(parts[1]) < 1) return this.errorReply("Cannot be less than 1.");
 					var bought = parts[1];
 					if (bought > lottery.maxTicketsPerUser) return this.errorReply("You cannot get this many lottery tickets.");
-					if (bought * lottery.ticketPrice > Economy.readMoneySync(user.userid)) return this.errorReply("Sorry, you do not have enough bucks to buy that many tickets.");
+					if (bought * lottery.ticketPrice > Economy.readMoneySync(user.userid)) return this.errorReply("Sorry, you do not have enough fire stones to buy that many tickets.");
 					if (lottery.playerIPS.length > 1) {
 						var filteredPlayerArray = lottery.playerIPS.filter(function(ip) {
 							return ip === user.latestIp;
@@ -57,7 +57,7 @@ exports.commands = {
 					}
 					saveLottery();
 				} else {
-					if (Economy.readMoneySync(toId(user.name)) < lottery.ticketPrice) return this.errorReply("You do not have enough bucks to partake in this game of Lottery.  Sorry.");
+					if (Economy.readMoneySync(toId(user.name)) < lottery.ticketPrice) return this.errorReply("You do not have enough fire stones to partake in this game of Lottery.  Sorry.");
 					if (lottery.playerIPS.length > 1) {
 						var filteredPlayerArray = lottery.playerIPS.filter(function(ip) {
 							return ip === user.latestIp;
@@ -82,7 +82,7 @@ exports.commands = {
 				lottery.maxTicketsPerUser = 10; //default max tickets per user
 				lottery.maxTicketPrice = 20;
 				if (isNaN(Number(parts[1]))) return this.errorReply('The pot must be a number greater than 0');
-				if (parts[1] > lottery.maxTicketPrice) return this.errorReply("Lottery tickets cannot cost more than " + lottery.maxTicketPrice + " bucks.");
+				if (parts[1] > lottery.maxTicketPrice) return this.errorReply("Lottery tickets cannot cost more than " + lottery.maxTicketPrice + " fire stones.");
 				lottery.startTime = Date.now();
 				lottery.ticketPrice = parts[1];
 				lottery.gameActive = true;
@@ -93,16 +93,16 @@ exports.commands = {
 				var room_notification =
 					"<div class=\"broadcast-gold\"><center><b><font size=4 color=red>Lottery Game!</font></b><br />" +
 					"<i><font color=gray>(Started by: " + Tools.escapeHTML(user.name) + ")</font></i><br />" +
-					"A game of lottery has been started!  Cost to join is <b>" + lottery.ticketPrice + "</b> Gold bucks.<br />" +
+					"A game of lottery has been started!  Cost to join is <b>" + lottery.ticketPrice + "</b> Fire Stones.<br />" +
 					"To buy a ticket, do <code>/lotto join</code>. (Max tickets per user: " + lottery.maxTicketsPerUser + ")</center></div>";
 				if (parts[2] === 'pmall') {
 					if (!this.can('hotpatch')) return false;
 					var loto_notification =
 						"<center><font size=5 color=red><b>Lottery Game!</b></font><br />" +
 						"A game of Lottery has started in <button name=\"send\" value=\"/join gamechamber\">Game Chamber</button>!<br />" +
-						"The ticket cost to join is <b> " + lottery.ticketPrice + "</b> Gold Bucks.  For every ticket bought, the server automatically matches that price towards the pot.<br />" +
+						"The ticket cost to join is <b> " + lottery.ticketPrice + "</b> Fire Stones.  For every ticket bought, the server automatically matches that price towards the pot.<br />" +
 						"(For more information, hop in the room and do /lotto or ask for help!)</center>";
-					Gold.pmAll('/html ' + loto_notification, '~Gold Lottery');
+					Gold.pmAll('/html ' + loto_notification, '~Fire Lottery');
 					Rooms.get('gamechamber').add('|raw|' + room_notification);
 				} else {
 					Rooms.get('gamechamber').add('|raw|' + room_notification);
@@ -119,13 +119,13 @@ exports.commands = {
 				if (!lottery.pot == 0) {
 					if (jackpot == 100) {
 						Rooms.get("gamechamber").add('|raw|<b><font size="7" color="green"><blink>JACKPOT!</blink></font></b>');
-						Rooms.get("gamechamber").add('|raw|<b><font size="4" color="' + Gold.hashColor(winner) + '">' + winner + '</b></font><font size="4"> has won the game of lottery for <b>' + (lottery.pot * 2) + '</b> bucks!</font>');
+						Rooms.get("gamechamber").add('|raw|<b><font size="4" color="' + Gold.hashColor(winner) + '">' + winner + '</b></font><font size="4"> has won the game of lottery for <b>' + (lottery.pot * 2) + '</b> Fire Stones!</font>');
 						Economy.writeMoney(toId(winner), lottery.pot * 2);
 						lottery = {};
 						saveLottery();
 					} else {
 						Economy.writeMoney(toId(winner), lottery.pot);
-						Rooms.get("gamechamber").add('|raw|<b><font size="4" color="' + Gold.hashColor(winner) + '">' + winner + '</b></font><font size="4"> has won the game of lottery for <b>' + lottery.pot + '</b> bucks!</font>');
+						Rooms.get("gamechamber").add('|raw|<b><font size="4" color="' + Gold.hashColor(winner) + '">' + winner + '</b></font><font size="4"> has won the game of lottery for <b>' + lottery.pot + '</b> Fire Stones!</font>');
 						lottery = {};
 						saveLottery();
 					}
@@ -184,8 +184,8 @@ exports.commands = {
 					"<div style=\"max-height: 125px; overflow-y: auto; overflow-x: hidden;\" target=\"_blank\">" +
 					"<u>Lottery Game Status:</u><br />" +
 					"Game started by: <b><font color=" + Gold.hashColor(lottery.createdBy) + ">" + Tools.escapeHTML(lottery.createdBy) + "</font></b><br />" +
-					"Pot: <b>" + lottery.pot + " Gold bucks</b><br />" +
-					"Ticket price: <b>" + lottery.ticketPrice + " Gold bucks</b><br />" +
+					"Pot: <b>" + lottery.pot + "Fire Stones</b><br />" +
+					"Ticket price: <b>" + lottery.ticketPrice + " Fire Stones</b><br />" +
 					"Game started: <b>" + moment(lottery.startTime).fromNow() + "</b><br />" +
 					"Max tickets per user: <b>" + lottery.maxTicketsPerUser + "</b><br />" +
 					"<b>Tickets bought (" + lottery.players.length + "):</b><br />" +
@@ -202,7 +202,7 @@ exports.commands = {
 			case 'pot':
 				if (!this.runBroadcast()) return;
 				if (!lottery.gameActive) return this.errorReply("There is no active game of lottery currently running.");
-				return this.sendReplyBox("The current lottery pot is worth: <b>" + lottery.pot + "</b> bucks.");
+				return this.sendReplyBox("The current lottery pot is worth: <b>" + lottery.pot + "</b> Fire Stones.");
 				break;
 
 			case 'obj':

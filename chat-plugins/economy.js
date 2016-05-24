@@ -12,12 +12,12 @@ exports.commands = {
 	shop: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (room.id === 'lobby' && this.broadcasting) {
-			return this.sendReplyBox('<center>Click <button name="send" value="/shop" style="background-color: black; font-color: white;" title="Enter the Shop!"><font color="white"><b>here</button></b></font> to enter our shop!');
+			return this.sendReplyBox('<center>Click <button name="send" value="/shop" style="background-color: #009ACD; font-color: black;" title="Enter the Shop!"><font color="black"><b>here</button></b></font> to enter our shop!');
 		} else {
 			Economy.updatePrices();
-			let topStyle = 'background: linear-gradient(10deg, #FFF8B5, #eadf7c, #FFF8B5); color: black; border: 1px solid #635b00; padding: 2px; border-radius: 5px;';
-			let top = '<center><h3><b><u>Gold Bucks Shop</u></b></h3><table style="' + topStyle + '" border="1" cellspacing ="2" cellpadding="3"><tr><th>Item</th><th>Description</th><th>Cost</th></tr>';
-			let bottom = '</table><br /><b>Prices in the shop go up and down automatically depending on the amount of bucks the average user has at that given time.</b><br />To buy an item from the shop, click the respective button for said item.<br>Do /getbucks to learn more about how to obtain bucks. </center>';
+			let topStyle = 'background: linear-gradient(10deg, #63D1F4, #63D1F4, #63D1F4); color: black; border: 1px solid black; padding: 2px; border-radius: 5px;';
+			let top = '<center><h3><b><u>Flame Savior Shop</u></b></h3><table style="' + topStyle + '" border="1" cellspacing ="2" cellpadding="3"><tr><th>Item</th><th>Description</th><th>Cost</th></tr>';
+			let bottom = '</table><br />To buy an item from the shop, click the respective button for said item. </center>';
 
 			return this.sendReply('|raw|' +
 				top +
@@ -27,12 +27,15 @@ exports.commands = {
 				Economy.shopTable("Custom", "Buys a custom avatar to be applied to your name (you supply)", prices['custom']) +
 				Economy.shopTable("Animated", "Buys an animated avatar to be applied to your name (you supply)", prices['animated']) +
 				Economy.shopTable("Room", "Buys a public unofficial chat room - will be deleted if inactive. Must have a valid purpose; staff can reject making these.", prices['room']) +
-				Economy.shopTable("Musicbox", "A command that lists / links up to 8 of your favorite songs", prices['musicbox']) +
+				Economy.shopTable("Room Rename", "Buys a room rename to rename your room", prices['roomrename']) +
 				Economy.shopTable("Trainer", "Gives you a custom command - you provide the HTML and command name.", prices['trainer']) +
 				Economy.shopTable("Mystery Box", "Gives you a special surprise gift when you open it! (Could be good or bad!)", prices['pack']) +
 				Economy.shopTable("Emote", "A custom chat emoticon such as \"Kappa\" - must be 30x30", prices['emote']) +
+				Economy.shopTable("Userlist Background Color", "Buys a custom Userlist background color. PM prince sky to get it. Check userlist background of prince sky for example", prices['userlistbg']) +
 				Economy.shopTable("Color", "This gives your username a custom color on the userlist and in all rooms (existing at time of purchase)", prices['color']) +
 				Economy.shopTable("Icon", "This gives your username a custom userlist icon on our regular client - MUST be a Pokemon and has to be 32x32.", prices['icon']) +
+				Economy.shopTable("Custom PM-Box Theme", "Buys a customizable PM-Box Theme for people to see when they pm you. PM kevin neo ryan to get it customized. Check pm-box of kevin neo ryan for example.", prices['pmbox']) +
+				Economy.shopTable("Userlist Icon + Background Color Combo", "Buys a userlist icon + background color combo for reduced price. PM prince sky to get your icon and background color.", prices['userlistcombo']) +
 				bottom
 			);
 		}
@@ -62,7 +65,7 @@ exports.commands = {
 		}
 		function processPurchase(price, item, desc) {
 			if (!desc) desc = '';
-			Economy.readMoney(user.userid, amount => {
+			Economy.readMoney(user.userid, function (amount) {
 				if (amount < price) return false; //this should never happen
 				Economy.writeMoney(user.userid, -price);
 				Economy.logTransaction(user.name + ' has purchased a(n) ' + item + '. ' + desc);
@@ -74,7 +77,7 @@ exports.commands = {
 		case 'symbol':
 			price = prices['symbol'];
 			if (Gold.hasBadge(user.userid, 'vip')) return this.errorReply("You are a VIP user - you do not need to buy custom symbols from the shop.  Use /customsymbol to change your symbol.");
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			processPurchase(price, parts[0]);
 			this.sendReply("You have purchased a custom symbol. You will have this until you log off for more than an hour.");
 			this.sendReply("Use /customsymbol [symbol] to change your symbol now!");
@@ -86,21 +89,21 @@ exports.commands = {
 		case 'customavatar':
 			price = prices['custom'];
 			if (Gold.hasBadge(user.userid, 'vip')) return this.errorReply("You are a VIP user - you do not need to buy avatars from the shop.  Use /customavatar to change your avatar.");
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			if (!parts[1]) return this.errorReply("Usage: /buy avatar, [link to avatar].  Must be a PNG or JPG.");
 			let filepaths = ['.png', '.jpg'];
 			if (!~filepaths.indexOf(parts[1].substr(-4))) return this.errorReply("Your image for a regular custom avatar must be either a PNG or JPG. (If it is a valid file type, it will end in one of these)");
 			processPurchase(price, parts[0], 'Image: ' + parts[1]);
-			if (Config.customavatars[user.userid]) output = ' | <button name="send" value="/sca delete, ' + user.userid + '" target="_blank" title="Click this to remove current avatar.">Click2Remove</button>';
+			if (Config.customavatars[user.userid]) output = ' | <button name="send" value="/customavatar delete ' + user.userid + '" target="_blank" title="Click this to remove current avatar.">Click2Remove</button>';
 			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a custom avatar. Image: ' + link(parts[1].replace(' ', ''), 'desired avatar'), true);
-			alertStaff('<center><button name="send" value="/sca set, ' + toId(user.name) + ', ' + parts[1] + '" target="_blank" title="Click this to set the above custom avatar.">Click2Set</button> ' + output + '</center>', false);
+			alertStaff('<center><button name="send" value="/customavatar set ' + toId(user.name) + ', ' + parts[1] + '" target="_blank" title="Click this to set the above custom avatar.">Click2Set</button> ' + output + '</center>', false);
 			this.sendReply("You have bought a custom avatar from the shop.  The staff have been notified and will set it ASAP.");
 			break;
 
 		case 'color':
 		case 'customcolor':
 			price = prices['color'];
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			if (!parts[1]) return this.errorReply("Usage: /buy color, [hex code OR name of an alt you want the color of]");
 			if (parts[1].length > 20) return this.errorReply("This is not a valid color, try again.");
 			processPurchase(price, parts[0], parts[1]);
@@ -111,7 +114,7 @@ exports.commands = {
 		case 'emote':
 		case 'emoticon':
 			price = prices['emote'];
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			if (!parts[1] || !parts[2]) return this.errorReply("Usage: /buy emote, [emote code], [image for the emote]");
 			let emoteFilepaths = ['.png', '.jpg', '.gif'];
 			if (!~emoteFilepaths.indexOf(parts[2].substr(-4))) return this.errorReply("Emoticons must be in one of the following formats: PNG, JPG, or GIF.");
@@ -125,20 +128,20 @@ exports.commands = {
 		case 'animated':
 			price = prices['animated'];
 			if (Gold.hasBadge(user.userid, 'vip')) return this.errorReply("You are a VIP user - you do not need to buy animated avatars from the shop.  Use /customavatar to change your avatar.");
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stoness for this item at this time, sorry.");
 			if (!parts[1]) return this.errorReply("Usage: /buy animated, [link to avatar].  Must be a GIF.");
 			if (parts[1].split('.').pop() !== 'gif') return this.errorReply("Your animated avatar must be a GIF. (If it's a GIF, the link will end in .gif)");
 			processPurchase(price, parts[0], 'Image: ' + parts[1]);
-			if (Config.customavatars[user.userid]) output = ' | <button name="send" value="/sca delete, ' + user.userid + '" target="_blank" title="Click this to remove current avatar.">Click2Remove</button>';
+			if (Config.customavatars[user.userid]) output = ' | <button name="send" value="/customavatar delete ' + user.userid + '" target="_blank" title="Click this to remove current avatar.">Click2Remove</button>';
 			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a custom animated avatar. Image: ' + link(parts[1].replace(' ', ''), 'desired avatar'), true);
-			alertStaff('<center><button name="send" value="/sca set, ' + toId(user.name) + ', ' + parts[1] + '" target="_blank" title="Click this to set the above custom avatar.">Click2Set</button> ' + output + '</center>', false);
+			alertStaff('<center><button name="send" value="/customavatar set ' + toId(user.name) + ', ' + parts[1] + '" target="_blank" title="Click this to set the above custom avatar.">Click2Set</button> ' + output + '</center>', false);
 			this.sendReply("You have purchased a custom animated avatar.  The staff have been notified and will add it ASAP.");
 			break;
 
 		case 'room':
 		case 'chatroom':
 			price = prices['room'];
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stoness for this item at this time, sorry.");
 			if (!parts[1]) return this.errorReply("Usage: /buy room, [room name]");
 			let bannedRoomNames = [',', '|', '[', '-'];
 			if (~bannedRoomNames.indexOf(parts[1])) return this.errorReply("This room name is not valid, try again.");
@@ -150,7 +153,7 @@ exports.commands = {
 		case 'trainer':
 		case 'trainercard':
 			price = prices['trainer'];
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			processPurchase(price, parts[0]);
 			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a trainer card.', true);
 			this.sendReply("|html|You have purchased a trainer card.  Please use <a href=http://goldservers.info/site/trainercard.html>this</a> to make your trainer card and then PM a leader or administrator the HTML with the command name you want it to have.");
@@ -159,7 +162,7 @@ exports.commands = {
 		case 'mb':
 		case 'musicbox':
 			price = prices['musicbox'];
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stoness for this item at this time, sorry.");
 			if (!Gold.createMusicBox(user)) return this.errorReply("You already have a music box! There's no need to buy another.");
 			processPurchase(price, parts[0]);
 			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a music box.', true);
@@ -171,18 +174,55 @@ exports.commands = {
 		case 'fix':
 			price = prices['fix'];
 			if (Gold.hasBadge(user.userid, 'vip')) price = 0;
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			processPurchase(price, parts[0]);
 			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a fix from the shop.', true);
 			user.canFixItem = true;
-			this.sendReply("You have purchased a fix from the shop.  You can use this to alter your trainer card, music box, or custom chat emoticon.  PM a leader or administrator to proceed.");
+			this.sendReply("You have purchased a fix from the shop.  You can use this to alter your trainer card, or custom chat emoticon.  PM a leader or administrator to proceed.");
+			break;
+		
+		case 'pmbox':
+			price = prices['pmbox'];
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry");
+			processPurchase(price, parts[0]);
+			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a custom pm box theme from the shop.', true);
+			user.canFixItem = true;
+			this.sendReply("You have purchased a custom pm-box theme from the shpp. Pm kevin neo ryan to get it customized");
+			break;
+			
+		case 'userlistbg':
+			price = prices['userlistbg'];
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
+			processPurchase(price, parts[0]);
+			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a userlist background from the shop.', true);
+			user.canFixItem = true;
+			this.sendReply("You have purchased a userlist background color from the shop. Pm prince slu to get it.");
+			break;
+			
+		case 'userlistcombo':
+			price = prices['userlistcombo'];
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry");
+			processPurchase(price, parts[0]);
+			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a userlist icon + background color combo from the shop', true);
+			user.canFixItem = true;
+			this.sendReply("You have purchased a userlist icon + background color combo from the shop. Pm prince sky to get you icon and background color");
+			break;
+			
+			
+		case 'roomrename':
+			price = prices['roomrename'];
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry");
+			processPurchase(price, parts[0]);
+			alertStaff(Gold.nameColor(user.name, true) + ' has purchased a room rename from the shop', true);
+			user.canFixItem = true;
+			this.sendReply("You have purchased a room rename from the shop. You can use this to change your room name. Pm a leader or administrator to processd.");
 			break;
 
 		case 'ad':
 		case 'declare':
 			price = prices['declare'];
 			if (Gold.hasBadge(user.userid, 'vip')) price = 0;
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			processPurchase(price, parts[0]);
 			alertStaff(Gold.nameColor(user.name, true) + ' has purchased the ability to declare from the shop.', true);
 			this.sendReply("You have purchased an advertisement declare from the shop.  Please prepare an advertisement for your room; a leader or administrator will soon be PMing you to proceed.");
@@ -192,7 +232,7 @@ exports.commands = {
 		case 'icon':
 			price = prices['icon'];
 			if (Gold.hasBadge(user.userid, 'vip')) price = 0;
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			if (!parts[1] || parts[1].length < 3) return this.errorReply("Usage: /buy icon, [32x32 icon image]");
 			let iconFilepaths = ['.png', '.jpg', '.gif'];
 			if (!~iconFilepaths.indexOf(parts[1].substr(-4))) return this.errorReply("Your image for a custom userlist icon must be a PNG, JPG, or GIF.");
@@ -206,7 +246,7 @@ exports.commands = {
 		case 'pack':
 		case 'magicpack':
 			price = prices['pack'];
-			if (!moneyCheck(price)) return this.errorReply("You do not have enough bucks for this item at this time, sorry.");
+			if (!moneyCheck(price)) return this.errorReply("You do not have enough stones for this item at this time, sorry.");
 			if (room.id !== 'lobby') return this.errorReply("You must buy this item in the Lobby!");
 			processPurchase(price, parts[0]);
 			let randomNumber = Math.floor((Math.random() * 100) + 1);
@@ -224,7 +264,6 @@ exports.commands = {
 			case 'the cost of the mystery box back':
 				Economy.writeMoney(user.userid, +prices['pack']);
 				break;
-			case 'ability to get Dubtrack VIP':
 			case 'ability to have a leader/admin broadcast an image to Lobby':
 			case 'custom color':
 			case 'ability to set the PotD':
@@ -288,16 +327,16 @@ exports.commands = {
 		//checks
 		if (isNaN(amount)) return this.errorReply("The amount you give must be a number.");
 		if (amount < 1) return this.errorReply("You can't give less than one buck.");
-		if (amount > 1000) return this.errorReply("You cannot give more than 1,000 bucks at once.");
+		if (amount > 10000) return this.errorReply("You cannot give more than 1,0000 stones at once.");
 
 		//give the bucks
 		Economy.writeMoney(toId(targetUser), amount);
 
 		//send replies
-		let amountLbl = amount + " Gold buck" + Gold.pluralFormat(amount, 's');
-		Economy.logTransaction(user.name + " has given " + amountLbl + " to " + targetUser + ".");
-		this.sendReply("You have given " + amountLbl + " to " + targetUser + ".");
-		if (Users(targetUser)) Users(targetUser).popup("|modal|" + user.name + " has given " + amountLbl + " to you.");
+		let lbl = (amount === 1 ? ' Fire stone' : ' Fire stones');
+		Economy.logTransaction(user.name + " has given " + amount + lbl + " to " + targetUser + ".");
+		this.sendReply("You have given " + amount + lbl + " to " + targetUser + ".");
+		if (Users(toId(targetUser))) Users(toId(targetUser)).popup("|modal|" + user.name + " has given " + amount + lbl + " to you.");
 	},
 
 	takebucks: 'removebucks',
@@ -311,17 +350,17 @@ exports.commands = {
 
 		//checks
 		if (isNaN(amount)) return this.errorReply("The amount you remove must be a number.");
-		if (amount < 1) return this.errorReply("You can't remove less than one buck.");
-		if (amount > 1000) return this.errorReply("You cannot remove more than 1,000 bucks at once.");
+		if (amount < 1) return this.errorReply("You can't remove less than one stone.");
+		if (amount > 1000) return this.errorReply("You cannot remove more than 1,000 stones at once.");
 
 		//take the bucks
 		Economy.writeMoney(toId(targetUser), -amount);
 
 		//send replies
-		let amountLbl = amount + " Gold buck" + Gold.pluralFormat(amount, 's');
-		Economy.logTransaction(user.name + " has removed " + amountLbl + " from " + targetUser + ".");
-		this.sendReply("You have removed " + amountLbl + " from " + targetUser + ".");
-		if (Users(targetUser)) Users(targetUser).popup("|modal|" + user.name + " has removed " + amountLbl + " from you.");
+		let lbl = (amount === 1 ? ' Fire stone' : ' Fire stones');
+		Economy.logTransaction(user.name + " has removed " + amount + lbl + " from " + targetUser + ".");
+		this.sendReply("You have removed " + amount + lbl + " from " + targetUser + ".");
+		if (Users(toId(targetUser))) Users(toId(targetUser)).popup("|modal|" + user.name + " has removed " + amount + lbl + " from you.");
 	},
 
 	tb: 'transferbucks',
@@ -335,7 +374,7 @@ exports.commands = {
 		//checks
 		if (isNaN(amount)) return this.errorReply("The amount you transfer must be a number.");
 		if (amount < 1) return this.errorReply("Cannot be less than 1.");
-		if (toId(parts[0]) === user.userid) return this.errorReply("You cannot transfer bucks to yourself.");
+		if (toId(parts[0]) === user.userid) return this.errorReply("You cannot transfer stones to yourself.");
 		if (Economy.readMoneySync(user.userid) < amount) return this.errorReply("You cannot transfer more than you have.");
 
 		//finally, transfer the bucks
@@ -344,16 +383,16 @@ exports.commands = {
 		});
 
 		//log the transaction
-		let amountLbl = amount + " Gold buck" + Gold.pluralFormat(amount, 's');
-		Economy.logTransaction(user.name + " has transfered " + amountLbl + " to " + parts[0]);
+		let lbl = (amount === 1 ? ' Fire stone' : ' Fire stones');
+		Economy.logTransaction(user.name + " has transfered " + amount + lbl + " to " + parts[0]);
 
 		//send return messages
-		this.sendReply("You have transfered " + amountLbl + " to " + parts[0] + ".");
+		this.sendReply("You have transfered " + amount + lbl + " to " + parts[0] + ".");
 
 		let targetUser = Users(parts[0]);
 		if (targetUser) {
-			targetUser.popup("|modal|" + user.name + " has transferred " + amountLbl + " to you.");
-			targetUser.sendTo(room, "|raw|<b>" + Gold.nameColor(user.name, false) + " has transferred " + amountLbl + " to you.</b>");
+			targetUser.popup("|modal|" + user.name + " has transferred " + amount + lbl + " to you.");
+			targetUser.sendTo(room, "|raw|<b>" + Tools.escapeHTML(user.name) + " has transferred " + amount + lbl + " to you.</b>");
 		}
 	},
 
@@ -367,14 +406,17 @@ exports.commands = {
 	atm: function (target, room, user) {
 		if (!this.runBroadcast()) return;
 		if (!target) target = user.name;
-		Economy.readMoney(toId(target), bucks => {
-			let output = "<u>Gold Wallet:</u><br />";
-			output += Gold.nameColor(target, true) + ' ' + (bucks === 0 ? "does not have any Gold bucks." : "has " + bucks + " Gold buck" + Gold.pluralFormat(bucks, 's') + ".");
+		let originalName = Tools.escapeHTML(target);
+		target = toId(target);
+		Economy.readMoney(target, bucks => {
+			let label = (bucks === 1 ? ' Fire stone' : ' Fire stones');
+			let output = "<u>Fire Wallet:</u><br />";
+			output += "<b><font color=\"" + Gold.hashColor(target) + "\">" + originalName + "</font></b> " + (bucks === 0 ? "does not have any Fire Stones." : "has " + bucks + label + ".");
 			this.sendReplyBox(output);
 			room.update();
 		});
 	},
-
+	
 	whosgotthemoneyz: 'richestuser',
 	richestuser: function (target, room, user) {
 		if (!this.runBroadcast()) return;
@@ -492,7 +534,7 @@ exports.commands = {
 
 	economy: function (target, room, user) {
 		if (!this.runBroadcast()) return;
-		return this.sendReplyBox("<b>Total bucks in economy:</b> " + Economy.totalBucks() + "<br /><b>The average user has:</b> " + Economy.averageBucks() + " bucks.");
+		return this.sendReplyBox("<b>Total Fire Stones in economy:</b> " + Economy.totalBucks() + "<br /><b>The average user has:</b> " + Economy.averageBucks() + " Fire Stones.");
 	},
 };
 
@@ -586,18 +628,23 @@ global.Economy = {
 		prices = {
 			'symbol': Math.round(avg * 0.035),
 			'declare': Math.round(avg * 0.19),
-			'fix': Math.round(avg * 0.55),
-			'custom': Math.round(avg * 0.69),
-			'animated': Math.round(avg * 0.82),
-			'room': Math.round(avg * 0.53),
+			'fix': Math.round(avg * 0.40),
+			'custom': Math.round(avg * 0.50),
+			'animated': Math.round(avg * 0.60),
+			'room': Math.round(avg * 0.70),
+			'roomrename': Math.round(avg * 0.20),
 			'musicbox': Math.round(avg * 0.4),
-			'trainer': Math.round(avg * 0.4),
-			'emote': Math.round(avg * 3),
-			'color': Math.round(avg * 5.3),
-			'icon': Math.round(avg * 10),
+			'trainer': Math.round(avg * 0.50),
+			'emote': Math.round(avg * 2),
+			'color': Math.round(avg * 3),
+			'icon': Math.round(avg * 4),
 			'pack': Math.round(avg * 1),
+			'pmbox': Math.round(avg * 4.50),
+			'userlistbg': Math.round(avg * 2),
+			'userlistcombo': Math.round(avg * 5.50),
 		};
 	},
+	
 
 	totalBucks: function () {
 		let data;
@@ -643,8 +690,8 @@ global.Economy = {
 	},
 
 	shopTable: function (item, desc, price) {
-		let buttonStyle = 'border-radius: 5px; background: linear-gradient(-30deg, #fff493, #e8d95a, #fff493); color: black; text-shadow: 0px 0px 5px #d6b600; border-bottom: 2px solid #635b00; border-right: 2px solid #968900;';
-		let descStyle = 'border-radius: 5px; border: 1px solid #635b00; background: #fff8b5; color: black;';
+		let buttonStyle = 'border-radius: 5px; background: linear-gradient(-30deg, #009ACD, #009ACD, #009ACD); color: black; border: 2px #009ACD;';
+		let descStyle = 'border-radius: 5px; border: 1px solid #000000; background: #00BFFF; color: black;';
 		return '<tr><td style="' + descStyle + '"><button title="Click this button to buy a(n) ' + item + ' from the shop." style="' + buttonStyle + '" name="send" value="/buy ' + item + '">' + item + '</button></td><td style="' + descStyle + '">' + desc + '</td><td style="' + descStyle + '">' + price + '</td></tr>';
 	},
 };
