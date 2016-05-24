@@ -95,14 +95,12 @@ Gold.emoticons = {
 					message = message.replace(/\~\~([^< ](?:[^<]*?[^< ])?)\~\~/g, '<strike>$1</strike>'); // strikethrough
 					message = Autolinker.link(message, {stripPrefix: false, phone: false, twitter: false});
 
-					var msg = '<small>' + user.getIdentity(room).substr(0,1) + '</small><strong class="username">' + this.userColor(user.name) + '</strong><b>' + this.userColor(user.name, ":") + '</b> &nbsp;' + message;
-					if (nightclubs[room.id]) msg = '<div style = "color: white; background: black; font-size: 11pt; text-shadow: 0px 0px 10px, 0px 0px 10px, 0px 0px 10px; padding:1px; margin:-3px;">' + msg + '</div>';
 					if (room.type === 'chat') {
-						room.add('|uhtml|' + user.userid + '|' + msg);
+						room.add('|uhtml|' + user.userid + '|<small>' + user.getIdentity(room).substr(0,1) + '</small><strong class="username">' + this.userColor(user.name) + '</strong><b>' + this.userColor(user.name, ":") + '</b> &nbsp;' + message);
 						room.update();
 						room.messageCount++;
 					} else {
-						room.addRaw(msg);
+						room.addRaw(' <small>' + user.getIdentity(room).substr(0,1) + '</small><strong class="username">' + this.userColor(user.name) + '</strong><b>' + this.userColor(user.name, ":") + '</b> &nbsp;' + message);
 						room.update();
 						room.messageCount++;
 					}
@@ -291,23 +289,20 @@ exports.commands = {
 			console.log("ERROR!  The Emoticon script has crashed!\n" + e.stack);
 		}
 	},
-	ezemotehelp: ["Gold's custom emoticons script commands:",
+	ezemotehelp: ["Flame Savior's custom emoticons script commands:",
 				"/emote add, [emote], [link] - Adds a chat emoticon. Requires ~.",
-				"/emote remove, [emote] - Removes a chat emoticon. Requires ~.",
-				"/emote modchat, set, [rank symbol / disable] - Sets moderated chat for chat emoticons in the respected room to the respected rank. Requires @, #, &, ~.",
-				"/emote modchat, disable - Disables moderated chat for chat emoticons (enabled by default.) Requires @, #, &, ~.",
-				"/emote modchat - Views the current moderated chat status of chat emoticons.",
-				"/emote list - Shows the chat emoticons in a list form.",
-				"/emote view - Shows all of the current chat emoticons with the respected image.",
+ 				"/emote remove, [emote] - Removes a chat emoticon. Requires ~.",
+ 				"/emote modchat, set, [rank symbol / disable] - Sets moderated chat for chat emoticons in the respected room to the respected rank. Requires @, #, &, ~.",
+  				"/emote modchat, disable - Disables moderated chat for chat emoticons (enabled by default.) Requires @, #, &, ~.",
+ 				"/emote modchat - Views the current moderated chat status of chat emoticons.",
+ 				"/emote list - Shows the chat emoticons in a list form.",
+ 				"/emote view - Shows all of the current chat emoticons with the respected image.",
 				"/emote object - Shows the object of Gold.emoticons.chatEmotes. (Mostly for development usage)",
-				"/emote max, [max emotes / message] - Sets the max emoticon messages per chat message.  Requires ~.",
-				"/emote help - Shows this help command."],
+ 				"/emote max, [max emotes / message] - Sets the max emoticon messages per chat message.  Requires ~.",
+ 				"/emote help - Shows this help command."],
 
 	emoticonlist: 'emotelist',
 	emotelist: function(target, room, user) {
 		return this.errorReply("Try /emote view instead.");
-	},
-	ev: function(target, room, user) {
-		return this.parse("/emote view");
-	},
+	}
 };
