@@ -1,5 +1,5 @@
 exports.commands =  {
-               cmds: 'serverhelp',
+               flamecmd: 'serverhelp',
     sfshelp: 'serverhelp',
     serverhelp: function(target, room, user, connection) {
         if (!this.canBroadcast()) return;
