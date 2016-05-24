@@ -33,7 +33,7 @@ class Dice {
 			delete this.room.dice;
 		}, INACTIVE_END_TIME);
 
-		let buck = (this.bet === 1 ? 'buck' : 'bucks');
+		let buck = (this.bet === 1 ? 'buck' : 'Flame Stones');
 		this.startMessage = '<div class="infobox"><b style="font-size: 14pt; color: #24678d"><center><span style="color: ' + Gold.hashColor(starter) + '">' + Tools.escapeHTML(starter) + '</span> has started a game of dice for <span style = "color: green">' + amount + '</span> ' + buck + '!</center></b><br>' +
 			'<center><img style="margin-right: 30px;" src = "http://i.imgur.com/eywnpqX.png" width="80" height="80">' +
 			'<img style="transform:rotateY(180deg); margin-left: 30px;" src="http://i.imgur.com/eywnpqX.png" width="80" height="80"><br>' +
@@ -77,7 +77,7 @@ class Dice {
 					this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center>' + this.players.map(user => Gold.nameColor(user.name, false)) + ' has joined the game!</center>').update();
 					return;
 				}
-				let players = this.players.map(user => Gold.nameColor(user.name, false)).join(' and ');
+				let players = this.players.map(user => Gold.nameColor(user.name)).join(' and ');
 				this.room.add('|uhtmlchange|' + this.room.diceCount + '|' + this.startMessage + '<center>' + players + ' have joined the game!</center></div>').update();
 				let roll1, roll2;
 				do {
@@ -89,7 +89,7 @@ class Dice {
 
 				let taxedAmt = Math.round(this.bet * TAX);
 				setTimeout(() => {
-					let buck = (this.bet === 1 ? 'buck' : 'bucks');
+					let buck = (this.bet === 1 ? 'buck' : 'Flame Stones');
 					this.room.add('|uhtmlchange|' + this.room.diceCount + '|<div class="infobox"><center>' + players + ' have joined the game!<br /><br />' +
 						'The game has been started! Rolling the dice...<br />' +
 						'<img src = "' + diceImg(roll1) + '" align = "left" title = "' + Tools.escapeHTML(p1.name) + '\'s roll"><img src = "' + diceImg(roll2) + '" align = "right" title = "' + p2.name + '\'s roll"><br />' +
@@ -125,7 +125,7 @@ exports.commands = {
 
 		let amount = Number(target) || 1;
 		if (isNaN(target)) return this.errorReply('"' + target + '" isn\'t a valid number.');
-		if (target.includes('.') || amount < 1 || amount > 5000) return this.sendReply('The number of bucks must be between 1 and 5,000 and cannot contain a decimal.');
+		if (target.includes('.') || amount < 1 || amount > 5000) return this.sendReply('The number of flamestones must be between 1 and 5,000 and cannot contain a decimal.');
 
 		room.dice = new Dice(room, amount, user.name);
 	},
@@ -157,8 +157,8 @@ exports.commands = {
 		room.dice.end(user);
 	},
 	dicegamehelp: [
-		'/startdice or /dicegame [amount] - Starts a game of dice in the room for a given number of bucks, 1 by default (NOTE: There is a 10% tax on bucks you win from dice games).',
-		'/joindice - Joins the game of dice. You cannot use this command if you don\'t have the number of bucks the game is for.',
+		'/startdice or /dicegame [amount] - Starts a game of dice in the room for a given number of flamestones, 1 by default (NOTE: There is a 10% tax on flamestones you win from dice games).',
+		'/joindice - Joins the game of dice. You cannot use this command if you don\'t have the number of flamestones the game is for.',
 		'/leavedice - Leaves the game of dice.',
 		'/enddice - Ends the game of dice. Requires + or higher to use.',
 	],
